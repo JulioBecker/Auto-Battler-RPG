@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fcc7cd3f0a8bd742a3cf042ce512503, type: 3}
+  m_Name: TestConsumable
+  m_EditorClassIdentifier: 
+  itemName: "Po\xE7\xE3o"
+  itemIcon: {fileID: 3994805371664618572, guid: d34849801d9040b45a9bc8a0dbd7df58, type: 3}
+  isStackable: 1

@@ -138,7 +138,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -3765906111195444188, guid: 05dc8ae5ead03ea48b8cdd849ddd1a71, type: 3}
       propertyPath: critChance
-      value: 0.73
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: -3765906111195444188, guid: 05dc8ae5ead03ea48b8cdd849ddd1a71, type: 3}
       propertyPath: critDamage
@@ -162,7 +162,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4414669943315994064, guid: 05dc8ae5ead03ea48b8cdd849ddd1a71, type: 3}
       propertyPath: m_Name
-      value: Skelleton Variant
+      value: Skelleton
       objectReference: {fileID: 0}
     - target: {fileID: 4414669943315994066, guid: 05dc8ae5ead03ea48b8cdd849ddd1a71, type: 3}
       propertyPath: moveX
