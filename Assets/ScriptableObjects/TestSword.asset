@@ -15,4 +15,16 @@ MonoBehaviour:
   itemName: Espada
   itemIcon: {fileID: -4184117239326914467, guid: d34849801d9040b45a9bc8a0dbd7df58, type: 3}
   isStackable: 0
+  health: 0
+  mana: 0
+  attack: 10
+  magic: 0
+  attackSpeed: 0.05
+  critChance: 0.01
+  critDamage: 0.1
+  dodgeChance: 0
+  physicResistance: 0
+  magicResistance: 0
+  speed: 0
+  range: 0
   equipType: 0

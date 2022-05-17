@@ -15,4 +15,18 @@ MonoBehaviour:
   itemName: Capacete
   itemIcon: {fileID: -4816295971151624872, guid: d34849801d9040b45a9bc8a0dbd7df58, type: 3}
   isStackable: 0
+  itemLevel: 0
+  rarity: 0
+  health: 0
+  mana: 0
+  attack: 0
+  magic: 0
+  attackSpeed: 0
+  critChance: 0
+  critDamage: 0
+  dodgeChance: 0
+  physicResistance: 10
+  magicResistance: 0
+  speed: 0
+  range: 0
   equipType: 1

@@ -11,6 +11,8 @@ public class EnemyController : MonoBehaviour
     bool canAttack = true;
     bool isWalking = false;
     bool inBattle = false;
+    [SerializeField] [Range(0, 1)] float healthGlobeChance;
+    [SerializeField] GameObject healthGlobePrefab;
     PlayerController target;
     Animator animator;
     [SerializeField] [Range(-1, 1)] int moveX;
@@ -74,6 +76,10 @@ public class EnemyController : MonoBehaviour
         {
             target.targets.Remove(this.gameObject);
             target.inRange = false;
+            if (gameUtils.CheckProbability(healthGlobeChance))
+            {
+                Instantiate(healthGlobePrefab, transform.position, Quaternion.identity);
+            }
             Destroy(this.gameObject);
         }
     }

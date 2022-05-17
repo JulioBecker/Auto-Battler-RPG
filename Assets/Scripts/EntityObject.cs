@@ -19,7 +19,7 @@ public class EntityObject : MonoBehaviour
     public int magicResistance;
     public float speed;
     public float range;
-    Slider healthBarSlider;
+    public Slider healthBarSlider;
     GameUtils gameUtils;
 
     public void Awake()
@@ -44,6 +44,8 @@ public class EntityObject : MonoBehaviour
         }
         else
         {
+            physicDamage = physicDamage > 0 ? Mathf.Max(physicDamage - physicResistance, 1) : 0;
+            magicDamage = magicDamage > 0 ? Mathf.Max(magicDamage - magicResistance, 1) : 0;
             currentHealth -= physicDamage;
             currentHealth -= magicDamage;
             currentHealth = Mathf.Max(currentHealth, 0);
@@ -60,6 +62,4 @@ public class EntityObject : MonoBehaviour
         //show the damage 
         gameUtils.ShowText(this.gameObject, textToShow, textColor);
     }
-
-
 }

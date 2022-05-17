@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    //[SerializeField] public Entity entity;
     public EntityObject entity;
     Animator animator;
     CircleCollider2D rangeCollider;
@@ -18,7 +17,7 @@ public class PlayerController : MonoBehaviour
     public float detection;
     public List<GameObject> targets;
     [SerializeField] int gold = 0;
-    GameUtils gameUtils;
+    public GameUtils gameUtils;
 
     private void Awake()
     {
@@ -103,7 +102,7 @@ public class PlayerController : MonoBehaviour
             {
                 //damage calculation
                 float multiplier = gameUtils.CheckProbability(entity.critChance) ? entity.critDamage : 1;
-                int physicalDamage = (int)(entity.attack * multiplier);
+                int physicalDamage = Mathf.RoundToInt(entity.attack * multiplier);
                 target.GetComponent<EnemyController>().entity.calcDamageTaken(physicalDamage, 0, multiplier > 1);
             }
         }
@@ -113,6 +112,12 @@ public class PlayerController : MonoBehaviour
     {
         gameUtils.ShowText(this.gameObject, "+" + qty.ToString() + " Gold", Color.yellow);
         gold+=qty;
+    }
+
+    public void HealthRecover(int healthValue)
+    {
+        entity.currentHealth = Mathf.Min(entity.currentHealth + healthValue, entity.maxHealth);
+        entity.healthBarSlider.value = entity.currentHealth;
     }
 
     private IEnumerator CooldownAttack()

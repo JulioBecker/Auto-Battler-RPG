@@ -6,18 +6,24 @@ using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
-    public GameObject slotHolder, equipSlotHolder, cursor;
     public GameObject inventoryPanel, equipmentPanel, statsPanel;
     public List<GameObject> slots, equipSlots;
     public ItemClass[] itemsToAdd;
     private SlotClass originalSlot, targetSlot, cursorSlot;
+    public GameObject slotHolder, equipSlotHolder, cursor;
+    private Image cursorBackground, cursorIcon;
     private int inventorySize, equipSize;
     private bool activeUI = true;
+    GameUtils gameUtils;
 
     private void Start()
     {
+        gameUtils = FindObjectOfType<GameUtils>();
         ToggleUI();
-        cursorSlot = cursor.GetComponent<SlotClass>();
+        cursorBackground = cursor.transform.GetChild(0).GetComponent<Image>();
+        cursorBackground.color = Color.clear;
+        cursorIcon = cursor.transform.GetChild(1).GetComponent<Image>();
+        cursorSlot = cursor.transform.GetChild(1).GetComponent<SlotClass>();
         cursor.SetActive(false);
         inventorySize = slotHolder.transform.childCount;
         equipSize = equipSlotHolder.transform.childCount;
@@ -35,10 +41,12 @@ public class InventoryManager : MonoBehaviour
         RefreshEquipmentUI();
         RefreshInventoryUI();
 
-        foreach(ItemClass item in itemsToAdd)
+        foreach (ItemClass item in itemsToAdd)
         {
             AddItem(item);
         }
+
+        AddItem(gameUtils.GenerateEquipment(1, ItemClass.Rarity.epic));
     }
 
     private void Update()
@@ -48,7 +56,8 @@ public class InventoryManager : MonoBehaviour
             ToggleUI();
         }
 
-        if (activeUI) {
+        if (activeUI)
+        {
             if (Input.GetMouseButtonDown(0))
             {
                 originalSlot = GetClosestSlot();
@@ -82,7 +91,8 @@ public class InventoryManager : MonoBehaviour
         for (int i = 0; i < inventorySize; i++)
         {
             GameObject slot = slots[i];
-            Image slotIcon = slot.transform.GetChild(0).GetComponentInChildren<Image>();
+            Image background = slot.transform.GetChild(0).GetComponentInChildren<Image>();
+            Image slotIcon = slot.transform.GetChild(1).GetComponentInChildren<Image>();
             Text slotText = slot.GetComponentInChildren<Text>();
             SlotClass slotClass = slot.GetComponent<SlotClass>();
             if (slot.GetComponent<SlotClass>().item != null)
@@ -90,6 +100,24 @@ public class InventoryManager : MonoBehaviour
                 ItemClass item = slotClass.item;
                 slotIcon.sprite = item.itemIcon;
                 slotIcon.enabled = true;
+                switch (item.rarity)
+                {
+                    case ItemClass.Rarity.common:
+                        background.color = Color.gray;
+                        break;
+                    case ItemClass.Rarity.uncommon:
+                        background.color = Color.green;
+                        break;
+                    case ItemClass.Rarity.rare:
+                        background.color = Color.blue;
+                        break;
+                    case ItemClass.Rarity.epic:
+                        background.color = new Color(0.5f, 0, 0.5f, 1); //purple
+                        break;
+                    case ItemClass.Rarity.legendary:
+                        background.color = new Color(1, 0.65f, 0, 1); //orange
+                        break;
+                }
                 if (item.isStackable)
                 {
                     slotText.text = slotClass.quantity.ToString();
@@ -101,6 +129,7 @@ public class InventoryManager : MonoBehaviour
             }
             else
             {
+                background.color = Color.clear;
                 slotIcon.enabled = false;
                 slotText.text = "";
             }
@@ -113,20 +142,40 @@ public class InventoryManager : MonoBehaviour
         {
             GameObject equipSlot = equipSlots[i];
             EquipmentSlotClass equipSlotClass = equipSlot.GetComponent<EquipmentSlotClass>();
-            Image equipIcon = equipSlot.transform.GetChild(0).GetComponentInChildren<Image>();
+            Image background = equipSlot.transform.GetChild(0).GetComponentInChildren<Image>();
+            Image equipIcon = equipSlot.transform.GetChild(1).GetComponentInChildren<Image>();
             if (equipSlotClass.item != null)
             {
                 ItemClass item = equipSlotClass.item;
+                switch (item.rarity)
+                {
+                    case ItemClass.Rarity.common:
+                        background.color = Color.gray;
+                        break;
+                    case ItemClass.Rarity.uncommon:
+                        background.color = Color.green;
+                        break;
+                    case ItemClass.Rarity.rare:
+                        background.color = Color.blue;
+                        break;
+                    case ItemClass.Rarity.epic:
+                        background.color = new Color(0.5f, 0, 0.5f, 1); //purple
+                        break;
+                    case ItemClass.Rarity.legendary:
+                        background.color = new Color(1, 0.65f, 0, 1); //orange
+                        break;
+                }
                 equipIcon.sprite = item.itemIcon;
                 equipIcon.enabled = true;
             }
             else
             {
+                background.color = Color.clear;
                 equipIcon.enabled = false;
             }
         }
     }
-    
+
     public bool AddItem(ItemClass item)
     {
         bool itemAdded;
@@ -141,7 +190,7 @@ public class InventoryManager : MonoBehaviour
             else
             {
                 temp = FreeSlot();
-                if(temp != null)
+                if (temp != null)
                 {
                     temp.item = item;
                     temp.quantity = 1;
@@ -174,7 +223,7 @@ public class InventoryManager : MonoBehaviour
     public bool RemoveItem(ItemClass item)
     {
         SlotClass slot = ContainItem(item);
-        if(slot != null)
+        if (slot != null)
         {
             if (item.isStackable && slot.quantity > 1)
             {
@@ -191,9 +240,9 @@ public class InventoryManager : MonoBehaviour
 
     private SlotClass ContainItem(string itemName)
     {
-        foreach(GameObject slot in slots)
+        foreach (GameObject slot in slots)
         {
-            if(slot.GetComponent<SlotClass>().item != null && slot.GetComponent<SlotClass>().item.itemName == itemName)
+            if (slot.GetComponent<SlotClass>().item != null && slot.GetComponent<SlotClass>().item.itemName == itemName)
             {
                 return slot.GetComponent<SlotClass>();
             }
@@ -217,7 +266,7 @@ public class InventoryManager : MonoBehaviour
     {
         foreach (GameObject slot in slots)
         {
-            if(slot.GetComponent<SlotClass>().item == null)
+            if (slot.GetComponent<SlotClass>().item == null)
             {
                 return slot.GetComponent<SlotClass>();
             }
@@ -227,9 +276,9 @@ public class InventoryManager : MonoBehaviour
 
     private SlotClass GetClosestSlot()
     {
-        foreach(GameObject slot in slots)
+        foreach (GameObject slot in slots)
         {
-            if(Vector2.Distance(slot.transform.position, Input.mousePosition) <= 24)
+            if (Vector2.Distance(slot.transform.position, Input.mousePosition) <= 24)
             {
                 return slot.GetComponent<SlotClass>();
             }
@@ -245,12 +294,17 @@ public class InventoryManager : MonoBehaviour
     }
 
     private void BeginItemMove()
-    {   
+    {
         cursorSlot.item = originalSlot.item;
         cursorSlot.quantity = originalSlot.quantity;
         originalSlot.Clear();
+        if(originalSlot is EquipmentSlotClass)
+        {
+            ChangePlayerStats(cursorSlot.item.GetEquipment(), null);
+        }
 
-        cursor.GetComponent<Image>().sprite = cursorSlot.item.itemIcon;
+        cursorBackground.color = originalSlot.transform.GetChild(0).GetComponentInChildren<Image>().color;
+        cursorIcon.GetComponent<Image>().sprite = cursorSlot.item.itemIcon;
         cursor.SetActive(true);
 
         RefreshInventoryUI();
@@ -259,37 +313,49 @@ public class InventoryManager : MonoBehaviour
 
     private void EndItemMove()
     {
-        if(targetSlot == null) //no slot drag
+        if (targetSlot == null) //no slot drag
         {
             originalSlot.item = cursorSlot.item;
             originalSlot.quantity = cursorSlot.quantity;
+            if(originalSlot is EquipmentSlotClass)
+            {
+                ChangePlayerStats(null, cursorSlot.item.GetEquipment());
+            }
         }
-        else if(targetSlot is EquipmentSlotClass) //equip item
+        else if (targetSlot is EquipmentSlotClass) //equip item
         {
             EquipItem();
         }
-        else if(targetSlot.item == null) //no item in slot
+        else if (targetSlot.item == null) //no item in slot
         {
             targetSlot.item = cursorSlot.item;
             targetSlot.quantity = cursorSlot.quantity;
         }
         else //switch items slots
         {
-            if (originalSlot is EquipmentSlotClass && (!(targetSlot.item is EquipmentClass) || !isSameEquipType(cursorSlot.item.GetEquipment(), targetSlot.item.GetEquipment())))
+            // switching from equipment slot
+
+            // can't
+            if (originalSlot is EquipmentSlotClass && (!(targetSlot.item is EquipmentClass) || !IsSameEquipType(cursorSlot.item.GetEquipment(), targetSlot.item.GetEquipment())))
             {
                 originalSlot.item = cursorSlot.item;
                 originalSlot.quantity = cursorSlot.quantity;
             }
-            else
+            else //can
             {
-                //isSameEquipType(originalSlot.item.GetEquipment(), targetSlot.item.GetEquipment())
+                if (originalSlot is EquipmentSlotClass)
+                {
+                    ChangePlayerStats(null, targetSlot.item.GetEquipment());
+                }
+
                 originalSlot.item = targetSlot.item;
                 originalSlot.quantity = targetSlot.quantity;
 
                 targetSlot.item = cursorSlot.item;
-                targetSlot.quantity = cursorSlot.quantity;
+                targetSlot.quantity = cursorSlot.quantity;  
             }
         }
+
         cursorSlot.Clear();
         cursor.SetActive(false);
         RefreshEquipmentUI();
@@ -298,7 +364,7 @@ public class InventoryManager : MonoBehaviour
 
     private void EquipItem()
     {
-        if(cursorSlot.item is EquipmentClass)
+        if (cursorSlot.item is EquipmentClass)
         {
             bool sameType = cursorSlot.item.GetEquipment().equipType == targetSlot.GetComponent<EquipmentSlotClass>().equipSlotType;
             if (sameType)
@@ -310,11 +376,15 @@ public class InventoryManager : MonoBehaviour
 
                     targetSlot.item = cursorSlot.item;
                     targetSlot.quantity = cursorSlot.quantity;
+
+                    ChangePlayerStats(originalSlot.item.GetEquipment(), targetSlot.item.GetEquipment());
                 }
                 else
                 {
                     targetSlot.item = cursorSlot.item;
                     targetSlot.quantity = cursorSlot.quantity;
+
+                    ChangePlayerStats(null, targetSlot.item.GetEquipment());
                 }
                 return;
             }
@@ -323,8 +393,45 @@ public class InventoryManager : MonoBehaviour
         originalSlot.quantity = cursorSlot.quantity;
     }
 
-    private bool isSameEquipType(EquipmentClass equip1, EquipmentClass equip2)
+    private bool IsSameEquipType(EquipmentClass equip1, EquipmentClass equip2)
     {
         return equip1.equipType == equip2.equipType;
+    }
+
+    private void ChangePlayerStats(EquipmentClass oldItem, EquipmentClass newItem)
+    {
+        if (oldItem != null)
+        {
+            GameUtils.gameUtils.player.entity.maxHealth -= oldItem.health;
+            GameUtils.gameUtils.player.entity.maxMana -= oldItem.mana;
+            GameUtils.gameUtils.player.entity.attack -= oldItem.attack;
+            GameUtils.gameUtils.player.entity.magic -= oldItem.magic;
+            GameUtils.gameUtils.player.entity.attackSpeed -= oldItem.attackSpeed;
+            GameUtils.gameUtils.player.entity.critChance -= oldItem.critChance;
+            GameUtils.gameUtils.player.entity.critDamage -= oldItem.critDamage;
+            GameUtils.gameUtils.player.entity.dodgeChance -= oldItem.dodgeChance;
+            GameUtils.gameUtils.player.entity.physicResistance -= oldItem.physicResistance;
+            GameUtils.gameUtils.player.entity.magicResistance -= oldItem.magicResistance;
+            GameUtils.gameUtils.player.entity.speed -= oldItem.speed;
+            GameUtils.gameUtils.player.entity.range -= oldItem.range;
+        }
+
+        if (newItem != null)
+        {
+            GameUtils.gameUtils.player.entity.maxHealth += newItem.health;
+            GameUtils.gameUtils.player.entity.maxMana += newItem.mana;
+            GameUtils.gameUtils.player.entity.attack += newItem.attack;
+            GameUtils.gameUtils.player.entity.magic += newItem.magic;
+            GameUtils.gameUtils.player.entity.attackSpeed += newItem.attackSpeed;
+            GameUtils.gameUtils.player.entity.critChance += newItem.critChance;
+            GameUtils.gameUtils.player.entity.critDamage += newItem.critDamage;
+            GameUtils.gameUtils.player.entity.dodgeChance += newItem.dodgeChance;
+            GameUtils.gameUtils.player.entity.physicResistance += newItem.physicResistance;
+            GameUtils.gameUtils.player.entity.magicResistance += newItem.magicResistance;
+            GameUtils.gameUtils.player.entity.speed += newItem.speed;
+            GameUtils.gameUtils.player.entity.range += newItem.range;
+        }
+
+        GameUtils.gameUtils.player.HealthRecover(0);
     }
 }
