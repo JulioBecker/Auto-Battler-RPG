@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
+    public static InventoryManager inventoryManager;
     public GameObject inventoryPanel, equipmentPanel, statsPanel;
     public List<GameObject> slots, equipSlots;
     public ItemClass[] itemsToAdd;
@@ -15,6 +16,14 @@ public class InventoryManager : MonoBehaviour
     private int inventorySize, equipSize;
     private bool activeUI = true;
     GameUtils gameUtils;
+
+    private void Awake()
+    {
+        if(inventoryManager == null)
+        {
+            inventoryManager = this;
+        }
+    }
 
     private void Start()
     {
@@ -45,8 +54,6 @@ public class InventoryManager : MonoBehaviour
         {
             AddItem(item);
         }
-
-        AddItem(gameUtils.GenerateEquipment(1, ItemClass.Rarity.epic));
     }
 
     private void Update()
@@ -293,6 +300,18 @@ public class InventoryManager : MonoBehaviour
         return null;
     }
 
+    public EquipmentSlotClass GetEquipSlotByType(EquipmentClass.EquipmentType equipType)
+    {
+        foreach (GameObject equipSlot in equipSlots)
+        {
+            if(equipSlot.GetComponent<EquipmentSlotClass>().equipSlotType == equipType)
+            {
+                return equipSlot.GetComponent<EquipmentSlotClass>();
+            }
+        }
+        return null;
+    }
+
     private void BeginItemMove()
     {
         cursorSlot.item = originalSlot.item;
@@ -402,36 +421,46 @@ public class InventoryManager : MonoBehaviour
     {
         if (oldItem != null)
         {
-            GameUtils.gameUtils.player.entity.maxHealth -= oldItem.health;
-            GameUtils.gameUtils.player.entity.maxMana -= oldItem.mana;
-            GameUtils.gameUtils.player.entity.attack -= oldItem.attack;
-            GameUtils.gameUtils.player.entity.magic -= oldItem.magic;
-            GameUtils.gameUtils.player.entity.attackSpeed -= oldItem.attackSpeed;
-            GameUtils.gameUtils.player.entity.critChance -= oldItem.critChance;
-            GameUtils.gameUtils.player.entity.critDamage -= oldItem.critDamage;
-            GameUtils.gameUtils.player.entity.dodgeChance -= oldItem.dodgeChance;
-            GameUtils.gameUtils.player.entity.physicResistance -= oldItem.physicResistance;
-            GameUtils.gameUtils.player.entity.magicResistance -= oldItem.magicResistance;
-            GameUtils.gameUtils.player.entity.speed -= oldItem.speed;
-            GameUtils.gameUtils.player.entity.range -= oldItem.range;
+            foreach(EntityAttribute attribute in oldItem.equipAttributes)
+            {
+                GameUtils.gameUtils.player.entity.attributes[(int)attribute.attribute].value -= oldItem.equipAttributes[(int)attribute.attribute].value;
+            }
+            //GameUtils.gameUtils.player.entity.maxHealth -= oldItem.health;
+            //GameUtils.gameUtils.player.entity.maxMana -= oldItem.mana;
+            //GameUtils.gameUtils.player.entity.attack -= oldItem.attack;
+            //GameUtils.gameUtils.player.entity.magic -= oldItem.magic;
+            //GameUtils.gameUtils.player.entity.attackSpeed -= oldItem.attackSpeed;
+            //GameUtils.gameUtils.player.entity.critChance -= oldItem.critChance;
+            //GameUtils.gameUtils.player.entity.critDamage -= oldItem.critDamage;
+            //GameUtils.gameUtils.player.entity.dodgeChance -= oldItem.dodgeChance;
+            //GameUtils.gameUtils.player.entity.physicResistance -= oldItem.physicResistance;
+            //GameUtils.gameUtils.player.entity.magicResistance -= oldItem.magicResistance;
+            //GameUtils.gameUtils.player.entity.speed -= oldItem.speed;
+            //GameUtils.gameUtils.player.entity.range -= oldItem.range;
+
+            GameUtils.gameUtils.player.Recover(-oldItem.GetAttributeValue(Attribute.maxHealth), -oldItem.GetAttributeValue(Attribute.maxMana));
         }
 
         if (newItem != null)
         {
-            GameUtils.gameUtils.player.entity.maxHealth += newItem.health;
-            GameUtils.gameUtils.player.entity.maxMana += newItem.mana;
-            GameUtils.gameUtils.player.entity.attack += newItem.attack;
-            GameUtils.gameUtils.player.entity.magic += newItem.magic;
-            GameUtils.gameUtils.player.entity.attackSpeed += newItem.attackSpeed;
-            GameUtils.gameUtils.player.entity.critChance += newItem.critChance;
-            GameUtils.gameUtils.player.entity.critDamage += newItem.critDamage;
-            GameUtils.gameUtils.player.entity.dodgeChance += newItem.dodgeChance;
-            GameUtils.gameUtils.player.entity.physicResistance += newItem.physicResistance;
-            GameUtils.gameUtils.player.entity.magicResistance += newItem.magicResistance;
-            GameUtils.gameUtils.player.entity.speed += newItem.speed;
-            GameUtils.gameUtils.player.entity.range += newItem.range;
-        }
+            foreach (EntityAttribute attribute in newItem.equipAttributes)
+            {
+                GameUtils.gameUtils.player.entity.attributes[(int)attribute.attribute].value += newItem.equipAttributes[(int)attribute.attribute].value;
+            }
+            //GameUtils.gameUtils.player.entity.maxHealth += newItem.health;
+            //GameUtils.gameUtils.player.entity.maxMana += newItem.mana;
+            //GameUtils.gameUtils.player.entity.attack += newItem.attack;
+            //GameUtils.gameUtils.player.entity.magic += newItem.magic;
+            //GameUtils.gameUtils.player.entity.attackSpeed += newItem.attackSpeed;
+            //GameUtils.gameUtils.player.entity.critChance += newItem.critChance;
+            //GameUtils.gameUtils.player.entity.critDamage += newItem.critDamage;
+            //GameUtils.gameUtils.player.entity.dodgeChance += newItem.dodgeChance;
+            //GameUtils.gameUtils.player.entity.physicResistance += newItem.physicResistance;
+            //GameUtils.gameUtils.player.entity.magicResistance += newItem.magicResistance;
+            //GameUtils.gameUtils.player.entity.speed += newItem.speed;
+            //GameUtils.gameUtils.player.entity.range += newItem.range;
 
-        GameUtils.gameUtils.player.HealthRecover(0);
+            GameUtils.gameUtils.player.Recover(newItem.GetAttributeValue(Attribute.maxHealth), newItem.GetAttributeValue(Attribute.maxMana));
+        }
     }
 }

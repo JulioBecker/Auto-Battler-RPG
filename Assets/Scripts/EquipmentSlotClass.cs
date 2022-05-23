@@ -5,7 +5,7 @@ using UnityEngine;
 public class EquipmentSlotClass : SlotClass
 {
     public EquipmentClass.EquipmentType equipSlotType;
-    void Start()
+    void Awake()
     {
         quantity = 1;
     }

@@ -11,7 +11,7 @@ public class HealthGlobeController : MonoBehaviour
         if(collision.tag == "Player")
         {
             PlayerController player = collision.GetComponent<PlayerController>();
-            player.HealthRecover(healthRecover);
+            player.Recover(healthRecover, 0);
             player.gameUtils.ShowText(collision.gameObject, "+" + healthRecover.ToString() + " Vida", Color.green);
             Destroy(this.gameObject);
         }

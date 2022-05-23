@@ -11,8 +11,13 @@ public class EnemyController : MonoBehaviour
     bool canAttack = true;
     bool isWalking = false;
     bool inBattle = false;
-    [SerializeField] [Range(0, 1)] float healthGlobeChance;
+    [SerializeField] [Range(0, 100)] int healthGlobeChance;
     [SerializeField] GameObject healthGlobePrefab;
+    [SerializeField] [Range(0, 100)] int itemChance;
+    [SerializeField] int itemMaxQty;
+    [SerializeField] GameObject itemPrefab;
+    [SerializeField] [Range(0, 1)] float[] rarityTable;
+    [SerializeField] [Range(0, 1)] float[] itemQtyTable;
     PlayerController target;
     Animator animator;
     [SerializeField] [Range(-1, 1)] int moveX;
@@ -23,13 +28,14 @@ public class EnemyController : MonoBehaviour
     {
         entity = GetComponent<EntityObject>();
         rangeCollider = GetComponent<CircleCollider2D>();
-        rangeCollider.radius = entity.range;
         animator = GetComponent<Animator>();
         gameUtils = FindObjectOfType<GameUtils>();
     }
 
     private void Start()
     {
+        rangeCollider.radius = entity.range * (entity.GetAttributeValue(Attribute.rangeMultiplier) / 100f);
+        entity.speed *= entity.GetAttributeValue(Attribute.speedMultiplier) / 100f;
         StartCoroutine(ChangeDirection());
     }
 
@@ -49,6 +55,9 @@ public class EnemyController : MonoBehaviour
         {
             if (inRange)
             {
+                animator.SetBool("isWalking", true);
+                animator.SetFloat("input_x", target.transform.position.x - transform.position.x);
+                animator.SetFloat("input_y", target.transform.position.y - transform.position.y);
                 animator.SetBool("isWalking", false);
                 moveX = 0;
                 moveY = 0;
@@ -74,13 +83,31 @@ public class EnemyController : MonoBehaviour
         //death
         if (entity.currentHealth == 0)
         {
-            target.targets.Remove(this.gameObject);
-            target.inRange = false;
-            if (gameUtils.CheckProbability(healthGlobeChance))
-            {
-                Instantiate(healthGlobePrefab, transform.position, Quaternion.identity);
-            }
+            DropHealthGlobe();
+            DropItems();
             Destroy(this.gameObject);
+        }
+    }
+
+    private void DropHealthGlobe()
+    {
+        if (gameUtils.CheckProbability(healthGlobeChance))
+        {
+            Instantiate(healthGlobePrefab, transform.position, Quaternion.identity);
+        }
+    }
+
+    private void DropItems()
+    {
+        if (gameUtils.CheckProbability(itemChance))
+        {
+            int qtyToDrop = GameUtils.gameUtils.IndexProbabilityTable(itemQtyTable) + 1;
+            for(int i = 0; i < qtyToDrop; i++)
+            {
+                ItemClass.Rarity rarity = (ItemClass.Rarity)GameUtils.gameUtils.IndexProbabilityTable(rarityTable);
+                GameObject item = Instantiate(itemPrefab, transform.position, Quaternion.identity);
+                item.GetComponent<DroppedItem>().item = GameUtils.gameUtils.GenerateEquipment(entity.GetAttributeValue(Attribute.level), rarity);
+            }
         }
     }
 
@@ -108,6 +135,9 @@ public class EnemyController : MonoBehaviour
         {
             moveX = Random.Range(-1, 2);
             moveY = Random.Range(-1, 2);
+            yield return new WaitForSeconds(2);
+            moveX = 0;
+            moveY = 0;
             yield return new WaitForSeconds(3);
         }
     }
@@ -117,15 +147,15 @@ public class EnemyController : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         if(target != null)
         {
-            float multiplier = gameUtils.CheckProbability(entity.critChance) ? entity.critDamage : 1;
-            int physicalDamage = Mathf.RoundToInt(entity.attack * multiplier);
+            float multiplier = gameUtils.CheckProbability(entity.GetAttributeValue(Attribute.critChance)) ? (entity.GetAttributeValue(Attribute.critDamage)/100f) : 1;
+            int physicalDamage = Mathf.RoundToInt(entity.GetAttributeValue(Attribute.attack) * multiplier);
             target.entity.calcDamageTaken(physicalDamage, 0, multiplier > 1);
         }
     }
 
     private IEnumerator CooldownAttack()
     {
-        yield return new WaitForSeconds(1 / entity.attackSpeed);
+        yield return new WaitForSeconds(1 / (entity.GetAttributeValue(Attribute.attackSpeed)/100f));
         canAttack = true;
     }
     

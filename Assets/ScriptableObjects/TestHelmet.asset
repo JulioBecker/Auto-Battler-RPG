@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddd36aa6fef987140a59e28e8037ec67, type: 3}
   m_Name: TestHelmet
   m_EditorClassIdentifier: 
-  itemName: Capacete
+  itemName: Super Item de Teste
   itemIcon: {fileID: -4816295971151624872, guid: d34849801d9040b45a9bc8a0dbd7df58, type: 3}
   isStackable: 0
   itemLevel: 0

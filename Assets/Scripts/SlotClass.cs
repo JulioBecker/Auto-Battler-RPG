@@ -29,79 +29,63 @@ public class SlotClass : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     private string TooltipTextConstruct()
     {
-        string color = string.Empty;
-
-        switch (item.rarity)
-        {
-            case ItemClass.Rarity.common:
-                color = "#666666";
-                break;
-            case ItemClass.Rarity.uncommon:
-                color = "#00ff00";
-                break;
-            case ItemClass.Rarity.rare:
-                color = "#0000ff";
-                break;
-            case ItemClass.Rarity.epic:
-                color = "#880080";
-                break;
-            case ItemClass.Rarity.legendary:
-                color = "#f06316";
-                break;
-        }
+        string color = item.GetColor();
         string text = string.Format("<b><color={0}>{1}</color></b>", color, item.itemName);
         if(item is EquipmentClass)
         {
             EquipmentClass equip = item.GetEquipment();
-            if(equip.health > 0)
-            {
-                text += "\nVida: " + equip.health.ToString();
+            EquipmentClass compare = null;
+
+            if (InventoryManager.inventoryManager.GetEquipSlotByType(equip.equipType).item != null) {
+                compare = InventoryManager.inventoryManager.GetEquipSlotByType(equip.equipType).item.GetEquipment();
             }
-            if (equip.mana > 0)
+            else
             {
-                text += "\nMana: " + equip.mana.ToString();
+                compare = (EquipmentClass)ScriptableObject.CreateInstance("EquipmentClass");
             }
-            if (equip.attack > 0)
+
+            text += GenerateStatsText(equip);
+            if(!(this is EquipmentSlotClass))
             {
-                text += "\nAtaque: " + equip.attack.ToString();
-            }
-            if (equip.magic > 0)
-            {
-                text += "\nMagia: " + equip.magic.ToString();
-            }
-            if (equip.attackSpeed > 0)
-            {
-                text += "\nVelocidade de Ataque: " + (Mathf.RoundToInt(equip.attackSpeed * 100)).ToString() + "%";
-            }
-            if (equip.critChance > 0)
-            {
-                text += "\nChance de Crítico: " + (Mathf.RoundToInt(equip.critChance * 100)).ToString() + "%";
-            }
-            if (equip.critDamage > 0)
-            {
-                text += "\nMultiplicador Crítico: " + (Mathf.RoundToInt(equip.critDamage * 100)).ToString() + "%";
-            }
-            if (equip.dodgeChance > 0)
-            {
-                text += "\nChance de Evasão: " + (Mathf.RoundToInt(equip.dodgeChance * 100)).ToString() + "%";
-            }
-            if (equip.physicResistance > 0)
-            {
-                text += "\nResistência Física: " + equip.physicResistance.ToString();
-            }
-            if (equip.magicResistance > 0)
-            {
-                text += "\nResistência Mágica: " + equip.magicResistance.ToString();
-            }
-            if (equip.speed > 0)
-            {
-                text += "\nVelocidade: " + equip.speed.ToString();
-            }
-            if (equip.range > 0)
-            {
-                text += "\nAlcance: " + equip.range.ToString();
+                text += GenerateCompareText(equip, compare);
             }
         }
         return text;
+    }
+
+    private string GenerateStatsText(EquipmentClass equip)
+    {
+        string stats = string.Empty;
+        foreach(EntityAttribute attribute in equip.equipAttributes)
+        {
+            if(attribute.value > 0)
+            {
+                stats += "\n" + attribute.name + ": " + attribute.value.ToString();
+            }
+        }
+        
+        return stats;
+    }
+
+    private string GenerateCompareText(EquipmentClass equip, EquipmentClass compare)
+    {
+        string compareText = "\n\n<b>Ao equipar:</b>";
+        for(int i = 1; i < EntityAttribute.attributeCount; i++)
+        {
+            if(equip.equipAttributes[i].value > 0 || compare.equipAttributes[i].value > 0)
+            {
+                compareText += "\n" + equip.equipAttributes[i].name + ": " + ReturnStringCompare(equip.equipAttributes[i].value, compare.equipAttributes[i].value);
+            }
+        }
+
+        return compareText;
+    }
+
+    private string ReturnStringCompare(int newAttribute, int oldAttribute)
+    {
+        if (newAttribute == 0 && oldAttribute == 0) return string.Empty;
+        if (newAttribute > oldAttribute) return string.Format("<color=green>(+{0})</color>", newAttribute - oldAttribute);
+        if (oldAttribute > newAttribute) return string.Format("<color=red>(-{0})</color>", oldAttribute - newAttribute);
+        return "(=)";
     }
 }

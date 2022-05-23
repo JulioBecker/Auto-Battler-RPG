@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 5025280966092047926}
   m_Layer: 0
   m_Name: HealthGlobe
-  m_TagString: Untagged
+  m_TagString: NotAttackable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

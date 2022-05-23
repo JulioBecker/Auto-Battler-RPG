@@ -15,7 +15,8 @@ public class PlayerController : MonoBehaviour
     float input_x;
     float input_y;
     public float detection;
-    public List<GameObject> targets;
+    public List<GameObject> targets = new List<GameObject>();
+    public List<GameObject> interactables = new List<GameObject>();
     [SerializeField] int gold = 0;
     public GameUtils gameUtils;
 
@@ -24,12 +25,12 @@ public class PlayerController : MonoBehaviour
         entity = GetComponent<EntityObject>();
         animator = GetComponent<Animator>();
         rangeCollider = GetComponent<CircleCollider2D>();
-        rangeCollider.radius = entity.range;
         gameUtils = FindObjectOfType<GameUtils>();
     }
     void Start()
     {
-        
+        rangeCollider.radius = entity.range * (entity.GetAttributeValue(Attribute.rangeMultiplier) / 100f);
+        entity.speed *= entity.GetAttributeValue(Attribute.speedMultiplier) / 100f;
     }
 
     void Update()
@@ -52,14 +53,25 @@ public class PlayerController : MonoBehaviour
             {
                 Attack();
             }
+            else if (Input.GetKeyDown(KeyCode.E) && interactables.Count > 0) //interact
+            {
+                Interactable interactable = interactables[0].GetComponent<Interactable>();
+                interactable.OnInteract();
+                if (interactable.destroyOnInteract)
+                {
+                    Destroy(interactable.gameObject);
+                }
+            }
         }
         else
         {
-            if(targets.Count == 0)
+            if (targets.Count == 0)
             {
                 inBattle = false;
                 return;
             }
+            animator.SetFloat("input_x", targets[0].transform.position.x - transform.position.x);
+            animator.SetFloat("input_y", targets[0].transform.position.y - transform.position.y);
             if (inRange)
             {
                 animator.SetBool("isWalking", false);
@@ -68,8 +80,6 @@ public class PlayerController : MonoBehaviour
             else
             {
                 animator.SetBool("isWalking", true);
-                animator.SetFloat("input_x", targets[0].transform.position.x - transform.position.x);
-                animator.SetFloat("input_y", targets[0].transform.position.y - transform.position.y);
             }
         }
     }
@@ -101,8 +111,8 @@ public class PlayerController : MonoBehaviour
             else if (target.GetComponent<EnemyController>() != null)
             {
                 //damage calculation
-                float multiplier = gameUtils.CheckProbability(entity.critChance) ? entity.critDamage : 1;
-                int physicalDamage = Mathf.RoundToInt(entity.attack * multiplier);
+                float multiplier = gameUtils.CheckProbability(entity.GetAttributeValue(Attribute.critChance)) ? entity.GetAttributeValue(Attribute.critDamage)/100f : 1;
+                int physicalDamage = Mathf.RoundToInt(entity.GetAttributeValue(Attribute.attack) * multiplier);
                 target.GetComponent<EnemyController>().entity.calcDamageTaken(physicalDamage, 0, multiplier > 1);
             }
         }
@@ -114,15 +124,17 @@ public class PlayerController : MonoBehaviour
         gold+=qty;
     }
 
-    public void HealthRecover(int healthValue)
+    public void Recover(int healthValue, int manaValue)
     {
-        entity.currentHealth = Mathf.Min(entity.currentHealth + healthValue, entity.maxHealth);
+        entity.currentHealth = Mathf.Min(entity.currentHealth + healthValue, entity.GetAttributeValue(Attribute.maxHealth));
         entity.healthBarSlider.value = entity.currentHealth;
+
+        entity.currentMana = Mathf.Min(entity.currentMana + manaValue, entity.GetAttributeValue(Attribute.maxMana));
     }
 
     private IEnumerator CooldownAttack()
     {
-        float cooldown = inBattle ? 1 / entity.attackSpeed : 1 / 1.5f;
+        float cooldown = inBattle ? 1 / (entity.GetAttributeValue(Attribute.attackSpeed)/100f) : 1 / 1.5f;
         yield return new WaitForSeconds(cooldown);
         canAttack = true;
     }
@@ -145,17 +157,27 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.tag != "NotAttackable" && collision.tag != "Detection")
+        if (collision.tag == "Interactable")
+        {
+            if (!interactables.Contains(collision.gameObject))
+                interactables.Add(collision.gameObject);
+        }
+        else if(collision.tag != "NotAttackable" && collision.tag != "Detection")
         {
             inRange = true;
             if(!targets.Contains(collision.gameObject))
                 targets.Add(collision.gameObject);
         }
+
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.tag != "NotAttackable" && collision.tag != "Detection")
+        if (collision.tag == "Interactable")
+        {
+            interactables.Remove(collision.gameObject);
+        }
+        else if(collision.tag != "NotAttackable" && collision.tag != "Detection")
         {
             targets.Remove(collision.gameObject);
             if (targets.Count == 0)
@@ -163,5 +185,6 @@ public class PlayerController : MonoBehaviour
                 inRange = false;
             }
         }
+
     }
 }

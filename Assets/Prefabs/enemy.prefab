@@ -98,20 +98,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b88f2a84e6b5674f90caa2162f9532c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 0
+  attributes: []
+  entityData: {fileID: 0}
   currentHealth: 0
-  maxMana: 0
   currentMana: 0
-  attack: 0
-  magic: 0
-  attackSpeed: 0
-  critChance: 0
-  critDamage: 0
-  dodgeChance: 0
-  physicResistance: 0
-  magicResistance: 0
   speed: 0
   range: 0
+  healthBarSlider: {fileID: 0}
 --- !u!114 &4414669943315994066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,6 +118,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entity: {fileID: 0}
+  healthGlobeChance: 0
+  healthGlobePrefab: {fileID: 7759278449829453990, guid: 1fa85b334d7e0db438368cbe68600215, type: 3}
+  itemChance: 0
+  itemMaxQty: 0
+  itemPrefab: {fileID: 1435814307430289429, guid: c77c413fad5cd4e4fa9070c17f2e1f7f, type: 3}
+  rarityTable: []
+  itemQtyTable: []
   moveX: 0
   moveY: 0
 --- !u!58 &4414669943315994065

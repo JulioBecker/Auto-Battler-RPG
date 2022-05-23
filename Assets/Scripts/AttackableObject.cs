@@ -7,7 +7,7 @@ public class AttackableObject : MonoBehaviour
     GameUtils gameUtils;
 
     [SerializeField] GameObject goldPrefab;
-    [Range(0f, 1f)] [SerializeField] float goldChance;
+    [Range(0, 100)] [SerializeField] int goldChance;
     [SerializeField] int goldMin;
     [SerializeField] int goldMax;
 

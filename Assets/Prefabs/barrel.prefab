@@ -123,6 +123,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   goldPrefab: {fileID: 5011235066912691699, guid: bcfa628e9428fa049b1b5375c691534e, type: 3}
-  goldChance: 0.2
+  goldChance: 30
   goldMin: 5
   goldMax: 10

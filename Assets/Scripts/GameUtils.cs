@@ -24,15 +24,26 @@ public class GameUtils : MonoBehaviour
     private void Awake()
     {
         if (gameUtils == null) gameUtils = this;
-        InitBasicStatsList();
     }
     private void Start()
     {
         player = FindObjectOfType<PlayerController>();
     }
-    public bool CheckProbability(float prob)
+    public bool CheckProbability(int prob)
     {
-        return Random.value <= prob;
+        return Random.Range(1, 101) <= prob;
+    }
+
+    public int IndexProbabilityTable(float[] table)
+    {
+        int index = table.Length - 1;
+        float roll = Random.value;
+        for(int i = 0; i < table.Length - 1; i++)
+        {
+            if (roll <= table[i]) return index;
+            index--;
+        }
+        return index;
     }
 
     public void ShowText(GameObject go, string text, Color color)
@@ -41,27 +52,14 @@ public class GameUtils : MonoBehaviour
         floatText.GetComponentInChildren<TextMesh>().color = color;
         floatText.GetComponentInChildren<TextMesh>().text = text;
     }
-    private void InitBasicStatsList()
-    {
-        basicStats.Add("Health");
-        basicStats.Add("Mana");
-        basicStats.Add("Attack");
-        basicStats.Add("Magic");
-        basicStats.Add("AttackSpeed");
-        basicStats.Add("CritChance");
-        basicStats.Add("CritDamage");
-        basicStats.Add("Dodge");
-        basicStats.Add("PhysicResistance");
-        basicStats.Add("MagicResistance");
-        basicStats.Add("Speed");
-        basicStats.Add("Range");
-        basicStatsCount = basicStats.Count;
-    }
+
     public EquipmentClass GenerateEquipment(int level, ItemClass.Rarity rarity)
     {
         EquipmentClass equip = (EquipmentClass)ScriptableObject.CreateInstance("EquipmentClass");
-        equip.itemLevel = level;
+        equip.SetAttributeValue(Attribute.level, level);
         equip.rarity = rarity;
+
+        //List<EntityAttribute> itemAttributes = new List<EntityAttribute>();
 
         // equipment type (helmet, weapon, chest, etc.)
         equip.equipType = (EquipmentClass.EquipmentType)Random.Range(0, EquipmentClass.EquipmentTypeCount);
@@ -69,105 +67,66 @@ public class GameUtils : MonoBehaviour
         {
             case EquipmentClass.EquipmentType.Weapon:
                 equip.itemIcon = weaponSprite;
-                equip.itemName = "Arma";
+                //itemAttributes.Add("Attack");
+                equip.SetAttributeValue(Attribute.attack, GetStatusValue());
                 break;
             case EquipmentClass.EquipmentType.Helmet:
                 equip.itemIcon = helmetSprite;
-                equip.itemName = "Capacete";
+                //itemAttributes.Add("PhysicResistance");
+                equip.SetAttributeValue(Attribute.physicResistance, GetStatusValue());
                 break;
             case EquipmentClass.EquipmentType.Chest:
                 equip.itemIcon = chestSprite;
-                equip.itemName = "Peitoral";
+                //itemAttributes.Add("PhysicResistance");
+                equip.SetAttributeValue(Attribute.physicResistance, GetStatusValue());
                 break;
             case EquipmentClass.EquipmentType.Legs:
                 equip.itemIcon = legsSprite;
-                equip.itemName = "Calças";
+                //itemAttributes.Add("PhysicResistance");
+                equip.SetAttributeValue(Attribute.physicResistance, GetStatusValue());
                 break;
             case EquipmentClass.EquipmentType.Boots:
                 equip.itemIcon = bootsSprite;
-                equip.itemName = "Botas";
+                //itemAttributes.Add("PhysicResistance");
+                equip.SetAttributeValue(Attribute.physicResistance, GetStatusValue());
                 break;
             case EquipmentClass.EquipmentType.Gloves:
                 equip.itemIcon = glovesSprite;
-                equip.itemName = "Luvas";
+                //itemAttributes.Add("PhysicResistance");
+                equip.SetAttributeValue(Attribute.physicResistance, GetStatusValue());
                 break;
             case EquipmentClass.EquipmentType.Ring:
                 equip.itemIcon = ringSprite;
-                equip.itemName = "Anel";
+                //itemAttributes.Add("MagicResistance");
+                equip.SetAttributeValue(Attribute.magicResistance, GetStatusValue());
                 break;
             case EquipmentClass.EquipmentType.Amulet:
                 equip.itemIcon = amuletSprite;
-                equip.itemName = "Amuleto";
+                //itemAttributes.Add("MagicResistance");
+                equip.SetAttributeValue(Attribute.magicResistance, GetStatusValue());
                 break;
         }
 
-        // Attribute draw based in the equip rarity
+        // Attribute roll based in the equip rarity
         int qtyAttributes = (int)rarity + 1;
-        List<string> itemAttributes = new List<string>();
-        for(int i = 0; i < qtyAttributes; i++)
+        for(int i = 1; i < qtyAttributes; i++)
         {
-            string attribute = basicStats[Random.Range(0, basicStatsCount)];
-            while (itemAttributes.Contains(attribute))
+            EntityAttribute attribute = equip.equipAttributes[Random.Range(0, EntityAttribute.attributeCount)];
+            while (attribute.value > 0)
             {
-                attribute = basicStats[Random.Range(0, basicStatsCount)];
+                attribute = equip.equipAttributes[Random.Range(0, EntityAttribute.attributeCount)];
             }
-            itemAttributes.Add(attribute);
-
-            switch (attribute)
-            {
-                case "Health":
-                    equip.health = (int)GetStatusValue(false);
-                    break;
-                case "Mana":
-                    equip.mana = (int)GetStatusValue(false);
-                    break;
-                case "Attack":
-                    equip.attack = (int)GetStatusValue(false);
-                    break;
-                case "Magic":
-                    equip.magic = (int)GetStatusValue(false);
-                    break;
-                case "AttackSpeed":
-                    equip.attackSpeed = (float)GetStatusValue(true);
-                    break;
-                case "CritChance":
-                    equip.critChance = (float)GetStatusValue(true);
-                    break;
-                case "CritDamage":
-                    equip.critDamage = (float)GetStatusValue(true);
-                    break;
-                case "Dodge":
-                    equip.dodgeChance = (float)GetStatusValue(true);
-                    break;
-                case "PhysicResistance":
-                    equip.physicResistance = (int)GetStatusValue(false);
-                    break;
-                case "MagicResistance":
-                    equip.magicResistance = (int)GetStatusValue(false);
-                    break;
-                case "Speed":
-                    equip.speed = (float)GetStatusValue(true);
-                    break;
-                case "Range":
-                    equip.range = (float)GetStatusValue(true);
-                    break;
-            }
+            attribute.value = GetStatusValue();
         }
 
+        equip.GenerateName();
         return equip;
     }
 
-    private object GetStatusValue(bool isFloat)
+    private int GetStatusValue()
     {
         int value = Random.Range(1, 11);
-        if (isFloat)
-        {
-            return value / 100f;
-        }
-        else
-        {
-            return value;
-        }
+        return value;
     }
 
     public void ShowTooltip(string text, Vector3 position)
